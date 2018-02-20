@@ -25,13 +25,13 @@ import java.nio.charset.Charset
  * Fast, no-dependency parser for JSON as defined by http://tools.ietf.org/html/rfc4627.
  */
 object JsonParser {
-  def apply(input: ParserInput): JsValue = new JsonParser(input).parseJsValue()
+  def apply(input: ParserInput, noDuplicates:Boolean=false): JsValue = new JsonParser(input,noDuplicates ).parseJsValue()
 
   class ParsingException(val summary: String, val detail: String = "")
     extends RuntimeException(if (summary.isEmpty) detail else if (detail.isEmpty) summary else summary + ":" + detail)
 }
 
-class JsonParser(input: ParserInput) {
+class JsonParser(input: ParserInput, noDuplicates:Boolean= false) {
   import JsonParser.ParsingException
 
   private[this] val sb = new JStringBuilder
@@ -82,6 +82,8 @@ class JsonParser(input: ParserInput) {
         require(':')
         ws()
         val key = sb.toString
+        if(noDuplicates && map.contains(key))
+          throw new ParsingException( s"""duplicate key "$key"""")
         `value`()
         val nextMap = map.updated(key, jsValue)
         if (ws(',')) members(nextMap) else nextMap
