@@ -121,5 +121,18 @@ class JsonParserSpec extends Specification {
       }
     }
 
+    "accept duplicates" in {
+      val parser = new JsonParser("""{"name":"Smith","name":"White"}""", false)
+      parser.parseJsValue(true) === JsObject("name" -> JsString("White"))
+    }
+
+    "reject duplicates" in {
+      {
+        val parser = new JsonParser("""{"name":"Smith","name":"White"}""", true)
+        parser.parseJsValue() must throwA[JsonParser.ParsingException].like {
+          case e: JsonParser.ParsingException => e.getMessage must contain("duplicate key \"name\"")
+        }
+      }
+    }
   }
 }
