@@ -47,7 +47,7 @@ package json {
   private[json] class RichString(string: String) {
     @deprecated("deprecated in favor of parseJson", "1.2.6")
     def asJson: JsValue = parseJson
-    def parseJson: JsValue = JsonParser(string)
+    def parseJson(implicit jsonParserContext: JsonParserContext = JsonParser.dftCtx): JsValue = JsonParser(string)
   }
 
   @deprecated("use RichAny", "1.3.4")
@@ -59,7 +59,7 @@ package json {
   private[json] class PimpedString(string: String) {
     @deprecated("deprecated in favor of parseJson", "1.2.6")
     def asJson: JsValue = parseJson
-    def parseJson: JsValue = JsonParser(string)
+    def parseJson(implicit jsonParserContext: JsonParserContext = JsonParser.dftCtx): JsValue = JsonParser(string)
   }
 
 }

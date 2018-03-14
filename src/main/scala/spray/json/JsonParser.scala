@@ -21,17 +21,21 @@ import java.lang.{StringBuilder => JStringBuilder}
 import java.nio.{CharBuffer, ByteBuffer}
 import java.nio.charset.Charset
 
+case class JsonParserContext(noDuplicates: Boolean)
+
 /**
  * Fast, no-dependency parser for JSON as defined by http://tools.ietf.org/html/rfc4627.
  */
 object JsonParser {
-  def apply(input: ParserInput, noDuplicates:Boolean=false): JsValue = new JsonParser(input,noDuplicates ).parseJsValue()
+  implicit def dftCtx=JsonParserContext(noDuplicates = false)
+
+  def apply(input: ParserInput)(implicit ctx:JsonParserContext=dftCtx ): JsValue = new JsonParser(input, ctx.noDuplicates).parseJsValue()
 
   class ParsingException(val summary: String, val detail: String = "")
     extends RuntimeException(if (summary.isEmpty) detail else if (detail.isEmpty) summary else summary + ":" + detail)
 }
 
-class JsonParser(input: ParserInput, noDuplicates:Boolean= false) {
+class JsonParser(input: ParserInput, noDuplicates: Boolean = false) {
   import JsonParser.ParsingException
 
   private[this] val sb = new JStringBuilder
