@@ -42,4 +42,21 @@ class CustomFormatSpec extends Specification with DefaultJsonProtocol {
     }
   }
 
+  "A custom JsonFormat should" should {
+    "reject duplicates if requested in context" in {
+      implicit val context = JsonParserContext(true)
+      """{ "name": "bob", "name" : "alice", "value": 42 }""".parseJson.convertTo[MyType] must throwA[JsonParser.ParsingException].like {
+        case e: JsonParser.ParsingException => e.getMessage must contain("duplicate key \"name\"")
+      }
+    }
+
+    "ignore duplicates if not requested explicitly in context" in {
+      implicit val context = JsonParserContext(false)
+      """{ "name": "bob", "name" : "alice", "value": 42 }""".parseJson.convertTo[MyType] mustEqual MyType("alice",42)
+      }
+
+    "ignore duplicates if not requested in context" in {
+      """{ "name": "bob", "name" : "alice", "value": 42 }""".parseJson.convertTo[MyType] mustEqual MyType("alice",42)
+    }
+  }
 }
